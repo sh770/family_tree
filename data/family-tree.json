@@ -1,5 +1,26 @@
 {
-  "persons": [],
+  "persons": [
+    {
+      "id": "p_c5260c6d49",
+      "firstName": "מרים",
+      "lastName": "ראם",
+      "gender": "F",
+      "isRoot": true,
+      "alive": true,
+      "birthSource": "heb",
+      "birthGreg": "1940-04-12",
+      "birthHebDay": 4,
+      "birthHebMonth": 1,
+      "birthHebYear": 5700,
+      "birthHebDisplay": "ד׳ בניסן ת״ש",
+      "deathSource": "",
+      "deathGreg": "",
+      "deathHebDay": null,
+      "deathHebMonth": null,
+      "deathHebYear": null,
+      "deathHebDisplay": ""
+    }
+  ],
   "relationships": [],
   "children": []
 }
