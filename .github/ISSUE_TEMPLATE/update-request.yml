@@ -1,0 +1,33 @@
+name: עדכון לעץ המשפחה
+description: בקשת עדכון שנוצרה מהאתר, וממתינה לאישור מנהל/ת העץ
+title: "עדכון עץ משפחה"
+labels: ["family-tree-update", "pending"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        טופס זה נוצר אוטומטית מהאתר. נא לא לערוך את שדה ה-JSON ידנית אלא אם ידוע לך מה אתה עושה.
+        **למנהל/ת:** כדי לאשר ולהטמיע בעץ החי — הוסיפו לישואה זו את התווית `approved`.
+        כדי לדחות — פשוט סגרו את הישואה בלי להוסיף את התווית.
+  - type: textarea
+    id: summary
+    attributes:
+      label: תקציר (לקריאה אנושית)
+      description: תיאור קצר וברור של מה שמבוקש לעדכן
+      placeholder: "לדוגמה: הוספת התינוקת נועה כבת למשפחת לוי-כהן"
+    validations:
+      required: true
+  - type: input
+    id: submitter
+    attributes:
+      label: שם השולח/ת
+      placeholder: "לדוגמה: דנה כהן"
+    validations:
+      required: false
+  - type: textarea
+    id: payload
+    attributes:
+      label: JSON Payload (טכני - נוצר אוטומטית ע"י האתר, לא לערוך ידנית)
+      render: json
+    validations:
+      required: true
