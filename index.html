@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>שלשלת - עץ המשפחה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700;900&family=Assistant:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1F2A24; --ink-2:#2B392F; --parchment:#FAF6ED; --parchment-2:#F1EADA;
+    --gold:#B08D57; --gold-dark:#8C6E3F; --clay:#8B4B3B; --text:#2B2620;
+    --muted:#8A8272; --line:#E3DAC4; --danger:#A8402F; --ok:#4B6B4E;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--parchment);color:var(--text);font-family:'Assistant',sans-serif;min-height:100vh;padding-bottom:76px;}
+  h1,h2,h3,.display{font-family:'Frank Ruhl Libre',serif;}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:10px;}
+  input,select,textarea{font-family:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;width:100%;color:var(--text);}
+  label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px;font-weight:600;}
+  header.top{background:var(--ink);color:var(--parchment);padding:22px 18px 26px;position:relative;overflow:hidden;}
+  header.top::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border:1px solid rgba(176,141,87,0.35);border-radius:50%;}
+  header.top h1{font-size:26px;margin:0 0 2px;color:#fff;}
+  header.top p{margin:0;font-size:13px;color:#C9CFC6;}
+  main{max-width:640px;margin:0 auto;padding:16px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px;}
+  .section-title{font-size:19px;margin:6px 0 14px;color:var(--ink);display:flex;align-items:center;gap:8px;}
+  .section-title .eyebrow{font-size:11px;color:var(--gold-dark);letter-spacing:1px;font-weight:700;font-family:'Assistant',sans-serif;}
+  nav.tabs{position:fixed;bottom:0;right:0;left:0;background:var(--ink);display:flex;z-index:50;box-shadow:0 -2px 10px rgba(0,0,0,0.15);}
+  nav.tabs button{flex:1;background:transparent;color:#9FA79A;padding:10px 2px 12px;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:4px;border-radius:0;}
+  nav.tabs button .ic{font-size:18px;}
+  nav.tabs button.active{color:var(--gold);}
+  .btn{background:var(--gold);color:#fff;padding:11px 16px;font-weight:700;font-size:14px;border-radius:10px;}
+  .btn.secondary{background:transparent;color:var(--ink);border:1px solid var(--line);}
+  .btn.danger{background:var(--danger);}
+  .btn.ok{background:var(--ok);}
+  .btn.block{width:100%;margin-top:14px;}
+  .btn.small{padding:7px 12px;font-size:13px;}
+  .thread{position:relative;padding-right:18px;border-right:2px solid var(--gold);margin-right:10px;}
+  .thread:last-child{border-color:transparent;}
+  .person-node{margin-bottom:14px;}
+  .person-card{background:#fff;border:1px solid var(--line);border-right:4px solid var(--gold);border-radius:10px;padding:10px 14px;position:relative;}
+  .person-card.female{border-right-color:var(--clay);}
+  .person-card.deceased{opacity:0.72;}
+  .person-card.draft{border-style:dashed;background:var(--parchment-2);}
+  .person-name{font-family:'Frank Ruhl Libre',serif;font-size:17px;font-weight:700;color:var(--ink);}
+  .person-meta{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.6;}
+  .badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--parchment-2);color:var(--gold-dark);margin-inline-start:6px;}
+  .badge.draft-badge{background:#EDE3C8;color:var(--gold-dark);}
+  .spouse-row{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;}
+  .spouse-row .heart{font-size:13px;color:var(--clay);}
+  .children-block{margin-top:10px;padding-top:6px;}
+  .empty{text-align:center;color:var(--muted);padding:40px 10px;font-size:14px;}
+  .empty .big{font-size:30px;display:block;margin-bottom:8px;}
+  .day-badge{width:42px;height:42px;border-radius:10px;background:var(--ink);color:var(--gold);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;}
+  .event-row{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);}
+  .event-row:last-child{border-bottom:none;}
+  .event-title{font-weight:600;font-size:14.5px;}
+  .event-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+  .draft-item{border-right:4px solid var(--gold-dark);}
+  .draft-item .type-tag{font-size:11px;font-weight:700;color:var(--gold-dark);}
+  .row-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:30px;font-size:13px;z-index:100;opacity:0;transition:opacity .25s;pointer-events:none;}
+  .toast.show{opacity:1;}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:4px;}
+  .divider{height:1px;background:var(--line);margin:16px 0;}
+  .status-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;}
+  .status-pill.draft{background:#EFE7D2;color:var(--gold-dark);}
+  .status-pill.sent{background:#DDEADD;color:var(--ok);}
+  /* date-group widget */
+  .dategroup{border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:6px;background:var(--parchment);}
+  .dg-tabs{display:flex;gap:6px;margin-bottom:8px;}
+  .dg-tab{flex:1;background:#fff;border:1px solid var(--line);color:var(--muted);font-size:12px;padding:6px 4px;border-radius:8px;}
+  .dg-tab.active{background:var(--ink);color:var(--gold);border-color:var(--ink);}
+  .dg-heb-row{display:flex;gap:6px;}
+  .dg-heb-row select.dg-heb-day{flex:0 0 68px;}
+  .dg-heb-row select.dg-heb-month{flex:1;}
+  .dg-heb-row input.dg-heb-year{flex:0 0 100px;}
+  .dg-preview{margin-top:6px;}
+  /* dashboard month picker */
+  .cal-toggle{display:flex;gap:6px;margin-bottom:10px;}
+  .cal-toggle button{flex:1;background:#fff;border:1px solid var(--line);color:var(--muted);padding:8px;border-radius:8px;font-size:13px;font-weight:600;}
+  .cal-toggle button.active{background:var(--ink);color:var(--gold);border-color:var(--ink);}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>שַׁלְשֶׁלֶת</h1>
+  <p>עץ המשפחה החי שלנו · תאריכים עבריים ולועזיים מסונכרנים אוטומטית</p>
+</header>
+
+<main id="app"></main>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="tree"><span class="ic">🌳</span>העץ</button>
+  <button data-tab="dashboard"><span class="ic">📅</span>דשבורד</button>
+  <button data-tab="add"><span class="ic">✍️</span>הוספה</button>
+  <button data-tab="drafts"><span class="ic">📝</span>הטיוטות שלי</button>
+  <button data-tab="about"><span class="ic">ℹ️</span>איך זה עובד</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* טעינת ספריית hebcal בצורה שלא חוסמת את שאר האתר:
+   הטעינה רצה ברקע (import() דינמי, עם timeout), והאפליקציה עצמה
+   מופעלת מיד ללא המתנה לה. אם הטעינה מצליחה בהמשך, מתבצע re-render
+   אוטומטי שמפעיל את תכונות הסנכרון העברי. אם היא נכשלת (לדוגמה
+   חסימת רשת בסביבת תצוגה מקדימה) — שאר האתר ממשיך לעבוד במלואו. */
+let HDate = null, gematriya = null, hebAvailable = false;
+function tryLoadHebcal(){
+  const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('hebcal load timeout')), 4000));
+  Promise.race([import('https://esm.sh/@hebcal/core@6.9.2'), timeout])
+    .then(mod => {
+      HDate = mod.HDate; gematriya = mod.gematriya; hebAvailable = true;
+      if(typeof state !== 'undefined'){ state.dashHebMonth = currentHebMonth(); if(state.loaded) render(); }
+    })
+    .catch(e => { console.warn('טעינת hebcal נכשלה — סנכרון עברי/לועזי לא זמין בסביבה זו', e); });
+}
+
+/* ============ הגדרות ============ */
+const REPO = "YOUR-GITHUB-USERNAME/family-tree";
+const DATA_URL = "./data/family-tree.json";
+const DRAFTS_KEY = "ft_local_drafts_v2";
+
+const GREG_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
+const HEB_MONTH_BASE = {1:'ניסן',2:'אייר',3:'סיוון',4:'תמוז',5:'אב',6:'אלול',7:'תשרי',8:'חשוון',9:'כסלו',10:'טבת',11:'שבט',12:'אדר',13:'אדר ב׳'};
+function hebMonthLabel(m, isLeap){ if(m===12 && isLeap) return 'אדר א׳'; return HEB_MONTH_BASE[m]; }
+function hebMonthLabelForDropdown(m){ if(m===12) return 'אדר / אדר א׳'; if(m===13) return 'אדר ב׳ (שנה מעוברת)'; return HEB_MONTH_BASE[m]; }
+function hebDisplay(hd){
+  const isLeap = HDate.isLeapYear(hd.getFullYear());
+  return `${gematriya(hd.getDate())} ב${hebMonthLabel(hd.getMonth(), isLeap)} ${gematriya(hd.getFullYear())}`;
+}
+function toISO(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+function currentHebYear(){ return hebAvailable ? new HDate(new Date()).getFullYear() : null; }
+function currentHebMonth(){ return hebAvailable ? new HDate(new Date()).getMonth() : null; }
+
+// גיבוי מוטמע למקרה שהדפדוף לא מצליח לטעון את data/family-tree.json
+const EMBEDDED_FALLBACK = {
+  persons:[
+    {id:"p_grandpa", firstName:"אברהם", lastName:"כהן", gender:"M", isRoot:true, alive:false,
+      birthSource:"greg", birthGreg:"1935-03-01", birthHebDay:26, birthHebMonth:12, birthHebYear:5695, birthHebDisplay:"כ״ו באדר א׳ תרצ״ה",
+      deathSource:"greg", deathGreg:"2015-06-10", deathHebDay:23, deathHebMonth:3, deathHebYear:5775, deathHebDisplay:"כ״ג בסיוון תשע״ה"},
+    {id:"p_grandma", firstName:"שרה", lastName:"כהן", gender:"F", isRoot:false, alive:true,
+      birthSource:"greg", birthGreg:"1938-08-20", birthHebDay:23, birthHebMonth:5, birthHebYear:5698, birthHebDisplay:"כ״ג באב תרצ״ח",
+      deathSource:"", deathGreg:"", deathHebDay:null, deathHebMonth:null, deathHebYear:null, deathHebDisplay:""}
+  ],
+  relationships:[
+    {id:"r_grandparents", a:"p_grandpa", b:"p_grandma", status:"married",
+      marriageSource:"greg", marriageGreg:"1958-06-15", marriageHebDay:27, marriageHebMonth:3, marriageHebYear:5718, marriageHebDisplay:"כ״ז בסיוון תשי״ח",
+      divorceSource:"", divorceGreg:"", divorceHebDay:null, divorceHebMonth:null, divorceHebYear:null, divorceHebDisplay:""}
+  ],
+  children:[]
+};
+
+/* ============ מצב ============ */
+let state = {
+  tab: 'tree',
+  live: { persons: [], relationships: [], children: [] },
+  drafts: [],
+  loaded: false,
+  usingFallback: false,
+  dashCal: 'greg',            // 'greg' | 'heb'
+  dashGregMonth: new Date().getMonth(),
+  dashHebMonth: hebAvailable ? currentHebMonth() : 1
+};
+
+function uid(prefix){ return prefix + '_' + Math.random().toString(36).slice(2,10); }
+
+/* ============ טעינה ============ */
+async function loadLive(){
+  try{
+    const res = await fetch(DATA_URL + '?t=' + Date.now());
+    if(!res.ok) throw new Error('fetch failed');
+    state.live = await res.json();
+  }catch(e){
+    state.live = EMBEDDED_FALLBACK;
+    state.usingFallback = true;
+  }
+}
+function loadDrafts(){
+  try{ const raw = localStorage.getItem(DRAFTS_KEY); state.drafts = raw ? JSON.parse(raw) : []; }
+  catch(e){ state.drafts = []; }
+}
+function saveDrafts(){
+  try{ localStorage.setItem(DRAFTS_KEY, JSON.stringify(state.drafts)); }
+  catch(e){ showToast('לא ניתן לשמור מקומית בדפדפן זה'); }
+}
+async function init(){
+  await loadLive();
+  loadDrafts();
+  state.loaded = true;
+  render();
+}
+
+/* ============ סנכרון תאריכים (תצוגה מקדימה בצד לקוח - האישור הסופי נעשה בשרת) ============ */
+function computeSyncedDate(source, gregStr, hebDay, hebMonth, hebYear){
+  if(source==='greg' && gregStr){
+    if(!hebAvailable) return {source:'greg', greg:gregStr, hebDay:null, hebMonth:null, hebYear:null, hebDisplay:''};
+    const d = new Date(gregStr+'T00:00:00');
+    if(isNaN(d)) return null;
+    const hd = new HDate(d);
+    return {source:'greg', greg:gregStr, hebDay:hd.getDate(), hebMonth:hd.getMonth(), hebYear:hd.getFullYear(), hebDisplay:hebDisplay(hd)};
+  }
+  if(source==='heb' && hebDay && hebMonth && hebYear){
+    if(!hebAvailable) return {source:'', greg:'', hebDay:null, hebMonth:null, hebYear:null, hebDisplay:''};
+    const hd = new HDate(Number(hebDay), Number(hebMonth), Number(hebYear));
+    return {source:'heb', greg:toISO(hd.greg()), hebDay:Number(hebDay), hebMonth:Number(hebMonth), hebYear:Number(hebYear), hebDisplay:hebDisplay(hd)};
+  }
+  return {source:'', greg:'', hebDay:null, hebMonth:null, hebYear:null, hebDisplay:''};
+}
+
+/* ============ מיזוג נתונים חיים + טיוטות ============ */
+function mergedPersons(){
+  const draftPersons = state.drafts.filter(d=>d.kind==='person').map(d=>({id:d.id, ...d.payload, _draft:true}));
+  return [...state.live.persons, ...draftPersons];
+}
+function mergedRelationships(){
+  const draftRels = state.drafts.filter(d=>d.kind==='relationship').map(d=>({id:d.id, ...d.payload, _draft:true}));
+  return [...state.live.relationships, ...draftRels];
+}
+function mergedChildren(){
+  const draftChildren = state.drafts.filter(d=>d.kind==='child').map(d=>({id:d.id, relationshipId:d.payload.relationshipId, personId:d.payload.personId, _draft:true}));
+  return [...state.live.children, ...draftChildren];
+}
+function getPerson(id){ return mergedPersons().find(p=>p.id===id); }
+function fullName(p){ return p ? (p.firstName+' '+p.lastName) : '—'; }
+function relationsOf(personId){ return mergedRelationships().filter(r=>r.a===personId || r.b===personId); }
+function otherSpouse(rel, personId){ return rel.a===personId ? getPerson(rel.b) : getPerson(rel.a); }
+function childrenOfRelation(relId){ return mergedChildren().filter(c=>c.relationshipId===relId).map(c=>getPerson(c.personId)).filter(Boolean); }
+function statusLabel(status){ if(status==='married') return 'נשואים'; if(status==='divorced') return 'גרושים'; if(status==='widowed') return 'אלמנות'; return status||''; }
+function fmtGreg(dateStr){
+  if(!dateStr) return '';
+  const d = new Date(dateStr+'T00:00:00');
+  if(isNaN(d)) return '';
+  return d.getDate()+' ב'+GREG_MONTHS[d.getMonth()]+' '+d.getFullYear();
+}
+
+/* ============ UI כללי ============ */
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2400);
+}
+function render(){
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===state.tab));
+  const app = document.getElementById('app');
+  if(!state.loaded){ app.innerHTML = '<div class="empty">טוען נתונים…</div>'; return; }
+  let html = '';
+  if(state.usingFallback){
+    html += `<div class="card" style="border-right:4px solid var(--gold-dark);"><span class="hint">⚠️ לא הצלחתי לטעון את data/family-tree.json — מוצגים נתוני דוגמה. בפריסה אמיתית ב-GitHub Pages זה ייטען אוטומטית.</span></div>`;
+  }
+  if(!hebAvailable && state.tab==='add'){
+    html += `<div class="card" style="border-right:4px solid var(--gold-dark);"><span class="hint">⚠️ ספריית הלוח העברי לא נטענה בסביבה זו (כנראה חסימת רשת בתצוגה המקדימה) — לכן אפשר להזין כאן רק תאריך לועזי, וסנכרון אוטומטי לעברי מבוצע בזמן האישור ב-GitHub. בפריסה אמיתית ב-GitHub Pages הזנת תאריך עברי תעבוד גם ישירות באתר.</span></div>`;
+  }
+  if(state.tab==='tree') html += renderTreeTab();
+  else if(state.tab==='dashboard') html += renderDashboardTab();
+  else if(state.tab==='add') html += renderAddTab();
+  else if(state.tab==='drafts') html += renderDraftsTab();
+  else if(state.tab==='about') html += renderAboutTab();
+  app.innerHTML = html;
+  bindTabEvents();
+}
+document.getElementById('tabs').addEventListener('click', e=>{
+  const btn = e.target.closest('button[data-tab]');
+  if(!btn) return;
+  state.tab = btn.dataset.tab;
+  render();
+});
+
+/* ============ טאב עץ ============ */
+function renderTreeTab(){
+  const roots = mergedPersons().filter(p=>p.isRoot);
+  if(roots.length===0) return `<div class="empty"><span class="big">🌱</span>עדיין אין עץ משפחה.<br>עברו ל"הוספה" כדי להתחיל.</div>`;
+  let html = `<div class="section-title"><span class="eyebrow">LIVE TREE</span> עץ המשפחה</div>`;
+  const rendered = new Set();
+  roots.forEach(r=>{ if(!rendered.has(r.id)) html += `<div class="thread">${renderPersonNode(r, rendered)}</div>`; });
+  return html;
+}
+function renderPersonNode(person, rendered){
+  if(!person || rendered.has(person.id)) return '';
+  rendered.add(person.id);
+  const rels = relationsOf(person.id);
+  let inner = `<div class="person-node">${personCard(person)}`;
+  if(rels.length===0){ inner += `</div>`; return inner; }
+  rels.forEach(rel=>{
+    const spouse = otherSpouse(rel, person.id);
+    inner += `<div class="spouse-row"><span class="heart">${rel.status==='divorced'?'💔':'♥'}</span>`;
+    inner += `<span style="font-size:12px;color:var(--muted)">${statusLabel(rel.status)}${rel.marriageGreg? ' · '+fmtGreg(rel.marriageGreg):''}${rel._draft?' <span class="badge draft-badge">טיוטה</span>':''}</span></div>`;
+    if(spouse && !rendered.has(spouse.id)){
+      rendered.add(spouse.id);
+      inner += `<div style="margin-inline-start:14px;margin-bottom:6px;">${personCard(spouse)}</div>`;
+    }
+    const kids = childrenOfRelation(rel.id);
+    if(kids.length){
+      inner += `<div class="children-block"><div class="thread">`;
+      kids.forEach(k=> inner += renderPersonNode(k, rendered));
+      inner += `</div></div>`;
+    }
+  });
+  inner += `</div>`;
+  return inner;
+}
+function personCard(p){
+  const cls = ['person-card'];
+  if(p.gender==='F') cls.push('female');
+  if(!p.alive) cls.push('deceased');
+  if(p._draft) cls.push('draft');
+  let meta = '';
+  if(p.birthGreg || p.birthHebDisplay) meta += `🎂 ${fmtGreg(p.birthGreg)}${p.birthHebDisplay?' · '+p.birthHebDisplay:''}<br>`;
+  if(!p.alive && (p.deathGreg || p.deathHebDisplay)) meta += `🕯️ ${fmtGreg(p.deathGreg)}${p.deathHebDisplay?' · '+p.deathHebDisplay:''}`;
+  return `<div class="${cls.join(' ')}">
+      <div class="person-name">${fullName(p)}${!p.alive?'<span class="badge">ז״ל</span>':''}${p._draft?'<span class="badge draft-badge">טיוטה פרטית</span>':''}</div>
+      <div class="person-meta">${meta}</div>
+    </div>`;
+}
+
+/* ============ טאב דשבורד ============ */
+function collectEvents(){
+  const events = [];
+  state.live.persons.forEach(p=>{
+    if(p.birthGreg) events.push({kind:'birth', icon:'🎂', title:fullName(p)+' — יום הולדת', greg:p.birthGreg, hebDay:p.birthHebDay, hebMonth:p.birthHebMonth, hebDisplay:p.birthHebDisplay});
+    if(!p.alive && p.deathGreg) events.push({kind:'death', icon:'🕯️', title:fullName(p)+' — יום פטירה', greg:p.deathGreg, hebDay:p.deathHebDay, hebMonth:p.deathHebMonth, hebDisplay:p.deathHebDisplay});
+  });
+  state.live.relationships.forEach(rel=>{
+    if(rel.marriageGreg) events.push({kind:'marriage', icon:'💍', title:fullName(getPerson(rel.a))+' ו'+fullName(getPerson(rel.b))+' — יום נישואין', greg:rel.marriageGreg, hebDay:rel.marriageHebDay, hebMonth:rel.marriageHebMonth, hebDisplay:rel.marriageHebDisplay});
+    if(rel.status==='divorced' && rel.divorceGreg) events.push({kind:'divorce', icon:'📄', title:fullName(getPerson(rel.a))+' ו'+fullName(getPerson(rel.b))+' — יום גירושין', greg:rel.divorceGreg, hebDay:rel.divorceHebDay, hebMonth:rel.divorceHebMonth, hebDisplay:rel.divorceHebDisplay});
+  });
+  return events;
+}
+function renderDashboardTab(){
+  const events = collectEvents();
+  let filtered, headerLabel;
+  if(state.dashCal==='greg'){
+    filtered = events.filter(ev=>{ const d=new Date(ev.greg+'T00:00:00'); return !isNaN(d) && d.getMonth()===state.dashGregMonth; })
+      .map(ev=>({...ev, day: new Date(ev.greg+'T00:00:00').getDate()}))
+      .sort((a,b)=>a.day-b.day);
+    headerLabel = GREG_MONTHS[state.dashGregMonth];
+  } else {
+    filtered = events.filter(ev=> ev.hebMonth === state.dashHebMonth)
+      .map(ev=>({...ev, day: ev.hebDay}))
+      .sort((a,b)=>a.day-b.day);
+    headerLabel = hebMonthLabelForDropdown(state.dashHebMonth);
+  }
+
+  let html = `<div class="section-title"><span class="eyebrow">DASHBOARD</span> אירועים החודש</div>`;
+  html += `<div class="cal-toggle">
+    <button data-cal="greg" class="${state.dashCal==='greg'?'active':''}">📅 חודש לועזי</button>
+    <button data-cal="heb" class="${state.dashCal==='heb'?'active':''}">✡️ חודש עברי</button>
+  </div>`;
+  html += `<div class="card">`;
+  if(state.dashCal==='greg'){
+    html += `<select id="dash-month-select">${GREG_MONTHS.map((m,i)=>`<option value="${i}" ${i===state.dashGregMonth?'selected':''}>${m}</option>`).join('')}</select>`;
+  } else {
+    html += `<select id="dash-month-select">${[1,2,3,4,5,6,7,8,9,10,11,12,13].map(m=>`<option value="${m}" ${m===state.dashHebMonth?'selected':''}>${hebMonthLabelForDropdown(m)}</option>`).join('')}</select>`;
+    html += `<p class="hint">💡 לוח שנה עברי: אירוע שנרשם ב"אדר" בשנה רגילה ייכלל תחת "אדר / אדר א׳". שנה מעוברת בלבד מכילה גם "אדר ב׳".</p>`;
+  }
+  html += `</div>`;
+
+  if(filtered.length===0){
+    html += `<div class="empty"><span class="big">📭</span>אין אירועים ב${headerLabel} בעץ החי</div>`;
+  } else {
+    html += `<div class="card">`;
+    filtered.forEach(ev=>{
+      html += `<div class="event-row"><div class="day-badge">${ev.day}</div><div>
+        <div class="event-title">${ev.icon} ${ev.title}</div>
+        <div class="event-sub">${state.dashCal==='greg' ? (ev.hebDisplay||'') : fmtGreg(ev.greg)}</div>
+      </div></div>`;
+    });
+    html += `</div>`;
+  }
+  return html;
+}
+
+/* ============ ווידג'ט תאריך מסונכרן ============ */
+function dateGroupHTML(prefix, label, optional){
+  return `
+  <div class="dategroup" data-prefix="${prefix}">
+    <label>${label}</label>
+    <div class="dg-tabs">
+      <button type="button" class="dg-tab active" data-mode="greg">📅 לועזי</button>
+      ${hebAvailable?'<button type="button" class="dg-tab" data-mode="heb">✡️ עברי</button>':''}
+      ${optional?'<button type="button" class="dg-tab" data-mode="none">— ללא —</button>':''}
+    </div>
+    <div class="dg-greg-wrap"><input type="date" class="dg-greg"></div>
+    ${hebAvailable?`<div class="dg-heb-wrap" style="display:none;">
+      <div class="dg-heb-row">
+        <select class="dg-heb-day"></select>
+        <select class="dg-heb-month"></select>
+        <input type="number" class="dg-heb-year" placeholder="שנה עברית">
+      </div>
+    </div>`:''}
+    <div class="dg-preview hint"></div>
+  </div>`;
+}
+function populateHebMonthSelect(sel, year){
+  const isLeap = HDate.isLeapYear(Number(year) || currentHebYear());
+  const count = isLeap ? 13 : 12;
+  let opts = '';
+  for(let m=1;m<=count;m++) opts += `<option value="${m}">${hebMonthLabel(m, isLeap)}</option>`;
+  sel.innerHTML = opts;
+}
+function populateHebDaySelect(sel){
+  let opts = '';
+  for(let d=1; d<=30; d++) opts += `<option value="${d}">${d}</option>`;
+  sel.innerHTML = opts;
+}
+function bindDateGroups(root){
+  root.querySelectorAll('.dategroup').forEach(group=>{
+    const tabs = group.querySelectorAll('.dg-tab');
+    const gregWrap = group.querySelector('.dg-greg-wrap');
+    const hebWrap = group.querySelector('.dg-heb-wrap');
+    const gregInput = group.querySelector('.dg-greg');
+    const daySel = group.querySelector('.dg-heb-day');
+    const monthSel = group.querySelector('.dg-heb-month');
+    const yearInput = group.querySelector('.dg-heb-year');
+    const preview = group.querySelector('.dg-preview');
+
+    if(hebAvailable && daySel && monthSel && yearInput){
+      populateHebDaySelect(daySel);
+      populateHebMonthSelect(monthSel, currentHebYear());
+      yearInput.value = currentHebYear();
+    }
+    group.dataset.mode = 'greg';
+
+    function updatePreview(){
+      const mode = group.dataset.mode;
+      if(mode==='none'){ preview.textContent=''; return; }
+      const synced = mode==='greg'
+        ? computeSyncedDate('greg', gregInput.value, null, null, null)
+        : (hebAvailable && daySel && monthSel && yearInput ? computeSyncedDate('heb', null, daySel.value, monthSel.value, yearInput.value) : null);
+      if(!synced || !synced.source){ preview.textContent = ''; return; }
+      preview.textContent = mode==='greg'
+        ? (synced.hebDisplay ? `≈ עברי: ${synced.hebDisplay}` : '')
+        : `≈ לועזי: ${fmtGreg(synced.greg)}`;
+    }
+    tabs.forEach(tab=>tab.addEventListener('click', ()=>{
+      tabs.forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      group.dataset.mode = tab.dataset.mode;
+      gregWrap.style.display = tab.dataset.mode==='greg' ? '' : 'none';
+      if(hebWrap) hebWrap.style.display = tab.dataset.mode==='heb' ? '' : 'none';
+      updatePreview();
+    }));
+    gregInput.addEventListener('change', updatePreview);
+    if(daySel) daySel.addEventListener('change', updatePreview);
+    if(monthSel) monthSel.addEventListener('change', updatePreview);
+    if(yearInput) yearInput.addEventListener('change', ()=>{ populateHebMonthSelect(monthSel, yearInput.value); updatePreview(); });
+  });
+}
+function collectDateGroup(root, prefix){
+  const group = root.querySelector(`.dategroup[data-prefix="${prefix}"]`);
+  if(!group) return {[prefix+'Source']:'', [prefix+'Greg']:'', [prefix+'HebDay']:null, [prefix+'HebMonth']:null, [prefix+'HebYear']:null, [prefix+'HebDisplay']:''};
+  const mode = group.dataset.mode;
+  if(mode==='none') return {[prefix+'Source']:'', [prefix+'Greg']:'', [prefix+'HebDay']:null, [prefix+'HebMonth']:null, [prefix+'HebYear']:null, [prefix+'HebDisplay']:''};
+  const gregInput = group.querySelector('.dg-greg');
+  const daySel = group.querySelector('.dg-heb-day');
+  const monthSel = group.querySelector('.dg-heb-month');
+  const yearInput = group.querySelector('.dg-heb-year');
+  const synced = mode==='greg'
+    ? computeSyncedDate('greg', gregInput.value, null, null, null)
+    : (daySel && monthSel && yearInput ? computeSyncedDate('heb', null, daySel.value, monthSel.value, yearInput.value) : {source:'', greg:'', hebDay:null, hebMonth:null, hebYear:null, hebDisplay:''});
+  return {
+    [prefix+'Source']: synced.source,
+    [prefix+'Greg']: synced.greg,
+    [prefix+'HebDay']: synced.hebDay,
+    [prefix+'HebMonth']: synced.hebMonth,
+    [prefix+'HebYear']: synced.hebYear,
+    [prefix+'HebDisplay']: synced.hebDisplay
+  };
+}
+
+/* ============ טאב הוספה ============ */
+function personOptionsMerged(){ return mergedPersons().map(p=>`<option value="${p.id}">${fullName(p)}${p._draft?' (טיוטה)':''}</option>`).join(''); }
+function relationOptionsMerged(){ return mergedRelationships().map(r=>`<option value="${r.id}">${fullName(getPerson(r.a))} ו${fullName(getPerson(r.b))} (${statusLabel(r.status)})${r._draft?' — טיוטה':''}</option>`).join(''); }
+
+function renderAddTab(){
+  return `
+    <div class="section-title"><span class="eyebrow">DRAFT</span> הוספה לטיוטה הפרטית שלי</div>
+    <p class="hint" style="margin-bottom:12px;">מה שתוסיפו כאן נשמר רק אצלכם בדפדפן ולא משפיע על מה שאחרים רואים, עד שתבחרו לשלוח לאישור מנהל/ת העץ. תאריך לועזי ועברי מסונכרנים אוטומטית — מספיק להזין אחד מהם.</p>
+    <div class="card">
+      <label>סוג הפריט</label>
+      <select id="add-type">
+        <option value="person">הוספת בן/בת משפחה חדש/ה</option>
+        <option value="relationship">קישור בין בני זוג</option>
+        <option value="child">הוספת ילד/ה לזוג</option>
+        <option value="edit">עדכון פרטי אדם קיים</option>
+      </select>
+      <div id="add-fields"></div>
+      <button class="btn block" id="add-save">שמירה בטיוטה הפרטית שלי</button>
+    </div>`;
+}
+function fieldsPerson(){
+  return `
+    <label>שם פרטי</label><input id="f-firstName">
+    <label>שם משפחה</label><input id="f-lastName">
+    <label>מגדר</label><select id="f-gender"><option value="M">זכר</option><option value="F">נקבה</option></select>
+    <label><input type="checkbox" id="f-isRoot" style="width:auto;display:inline-block;margin-inline-end:6px;">אב/אם קדמון/ית (שורש העץ)</label>
+    <label><input type="checkbox" id="f-alive" checked style="width:auto;display:inline-block;margin-inline-end:6px;">בין החיים</label>
+    ${dateGroupHTML('birth', 'תאריך לידה', false)}
+    ${dateGroupHTML('death', 'תאריך פטירה (אם רלוונטי)', true)}
+  `;
+}
+function fieldsRelationship(){
+  return `
+    <label>בן/בת זוג א׳</label><select id="f-a">${personOptionsMerged()}</select>
+    <label>בן/בת זוג ב׳</label><select id="f-b">${personOptionsMerged()}</select>
+    <label>סטטוס</label>
+    <select id="f-status"><option value="married">נשואים</option><option value="divorced">גרושים</option><option value="widowed">אלמנות</option></select>
+    ${dateGroupHTML('marriage', 'תאריך נישואין', true)}
+    ${dateGroupHTML('divorce', 'תאריך גירושין (אם רלוונטי)', true)}
+    <p class="hint">💡 בן/בת זוג לשעבר: הוסיפו קישור נוסף לאותם שני אנשים עם סטטוס "גרושים".</p>
+  `;
+}
+function fieldsChild(){
+  return `
+    <label>זוג ההורים</label><select id="f-relationshipId">${relationOptionsMerged()}</select>
+    <label>הילד/ה</label><select id="f-personId">${personOptionsMerged()}</select>
+    <p class="hint">💡 אם הילד/ה עדיין לא קיים/ת בעץ — הוסיפו אותו/ה קודם כ"בן/בת משפחה חדש/ה".</p>
+  `;
+}
+function fieldsEdit(){
+  return `
+    <label>בחר/י אדם קיים לעדכון</label><select id="f-personId">${mergedPersons().filter(p=>!p._draft).map(p=>`<option value="${p.id}">${fullName(p)}</option>`).join('')}</select>
+    <label>שינוי סטטוס חיים</label>
+    <select id="f-alive"><option value="">— ללא שינוי —</option><option value="true">בין החיים</option><option value="false">נפטר/ה</option></select>
+    ${dateGroupHTML('death', 'תאריך פטירה', true)}
+  `;
+}
+function bindAddForm(){
+  const typeSel = document.getElementById('add-type');
+  const fieldsDiv = document.getElementById('add-fields');
+  function renderFields(){
+    const t = typeSel.value;
+    if(t==='person') fieldsDiv.innerHTML = fieldsPerson();
+    else if(t==='relationship') fieldsDiv.innerHTML = fieldsRelationship();
+    else if(t==='child') fieldsDiv.innerHTML = fieldsChild();
+    else if(t==='edit') fieldsDiv.innerHTML = fieldsEdit();
+    bindDateGroups(fieldsDiv);
+  }
+  typeSel.addEventListener('change', renderFields);
+  renderFields();
+}
+function collectAddPayload(type){
+  const root = document.getElementById('add-fields');
+  const val = id => { const el = document.getElementById(id); if(!el) return undefined; return el.type==='checkbox' ? el.checked : el.value; };
+  if(type==='person') return {
+    firstName:val('f-firstName')||'', lastName:val('f-lastName')||'', gender:val('f-gender')||'M',
+    isRoot:!!val('f-isRoot'), alive:!!val('f-alive'),
+    ...collectDateGroup(root,'birth'), ...collectDateGroup(root,'death')
+  };
+  if(type==='relationship') return {
+    a:val('f-a'), b:val('f-b'), status:val('f-status'),
+    ...collectDateGroup(root,'marriage'), ...collectDateGroup(root,'divorce')
+  };
+  if(type==='child') return {relationshipId:val('f-relationshipId'), personId:val('f-personId')};
+  if(type==='edit') return {personId:val('f-personId'), alive:val('f-alive'), ...collectDateGroup(root,'death')};
+}
+
+/* ============ טאב הטיוטות שלי ============ */
+function draftKindLabel(k){ return {person:'בן/בת משפחה', relationship:'קשר בני זוג', child:'ילד/ה', edit:'עדכון פרטים'}[k]||k; }
+function describeDraft(d){
+  const p = d.payload;
+  if(d.kind==='person') return `${p.firstName} ${p.lastName}`;
+  if(d.kind==='relationship') return `${fullName(getPerson(p.a))} ו${fullName(getPerson(p.b))} — ${statusLabel(p.status)}`;
+  if(d.kind==='child') return `${fullName(getPerson(p.personId))} כילד/ה בזוג`;
+  if(d.kind==='edit') return `עדכון עבור ${fullName(getPerson(p.personId))}`;
+  return '';
+}
+function renderDraftsTab(){
+  let html = `<div class="section-title"><span class="eyebrow">MY DRAFTS</span> הטיוטות הפרטיות שלי</div>`;
+  if(state.drafts.length===0){
+    html += `<div class="empty"><span class="big">📝</span>אין עדיין טיוטות. עברו ל"הוספה" כדי ליצור.</div>`;
+    return html;
+  }
+  html += `<p class="hint" style="margin-bottom:10px;">הטיוטות נשמרות רק בדפדפן הזה. לחצו "שליחה לאישור" כדי לפתוח בקשה ל-GitHub — לאחר שמנהל/ת העץ יאשר, זה יופיע אצל כולם.</p>`;
+  state.drafts.forEach(d=>{
+    html += `<div class="card draft-item">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span class="type-tag">${draftKindLabel(d.kind)}</span>
+        <span class="status-pill ${d.submittedAt?'sent':'draft'}">${d.submittedAt?'נשלח לאישור':'טיוטה מקומית'}</span>
+      </div>
+      <div style="font-size:14px;margin-top:6px;">${describeDraft(d)}</div>
+      <div class="row-actions">
+        <button class="btn small ok" data-submit="${d.id}">📤 שליחה לאישור מנהל</button>
+        <button class="btn small danger" data-delete="${d.id}">🗑 מחיקה</button>
+      </div>
+    </div>`;
+  });
+  return html;
+}
+function buildBatchFor(draftId){
+  const included = new Set();
+  const batch = [];
+  function addDep(id){
+    if(included.has(id)) return;
+    const d = state.drafts.find(x=>x.id===id);
+    if(!d) return;
+    included.add(id);
+    if(d.kind==='relationship'){ addDep(d.payload.a); addDep(d.payload.b); }
+    if(d.kind==='child'){ addDep(d.payload.relationshipId); addDep(d.payload.personId); }
+    const typeMap = {person:'addPerson', relationship:'addRelationship', child:'addChild', edit:'editPerson'};
+    const payload = Object.assign({}, d.payload, {tempId: d.id});
+    batch.push({type: typeMap[d.kind], payload});
+  }
+  addDep(draftId);
+  return batch;
+}
+
+/* ============ טאב איך זה עובד ============ */
+function renderAboutTab(){
+  return `
+    <div class="section-title"><span class="eyebrow">HOW IT WORKS</span> איך זה עובד</div>
+    <div class="card">
+      <h3 style="margin-top:0;">1. העץ החי</h3>
+      <p style="font-size:14px;">כולם רואים את אותו עץ, שנטען מהקובץ <code>data/family-tree.json</code> בריפו ב-GitHub.</p>
+      <div class="divider"></div>
+      <h3>2. תאריכים מסונכרנים</h3>
+      <p style="font-size:14px;">מספיק להזין תאריך לועזי <b>או</b> עברי אחד — הצד השני מחושב אוטומטית דרך ספריית hebcal, גם בתצוגה בדפדפן וגם באופן סמכותי בזמן האישור ב-GitHub Action.</p>
+      <div class="divider"></div>
+      <h3>3. הטיוטה הפרטית שלי</h3>
+      <p style="font-size:14px;">כל מה שאתם מוסיפים בטאב "הוספה" נשמר רק בדפדפן שלכם, עד שתשלחו אותו לאישור.</p>
+      <div class="divider"></div>
+      <h3>4. האישור</h3>
+      <p style="font-size:14px;">מנהל/ת העץ מוסיפים ל-Issue את התווית <b>approved</b>. GitHub Action מטמיע את השינוי בקובץ הנתונים, וכולם רואים אותו באתר החי תוך דקות.</p>
+    </div>
+  `;
+}
+
+/* ============ קישור אירועים ============ */
+function bindTabEvents(){
+  if(state.tab==='dashboard'){
+    document.querySelectorAll('[data-cal]').forEach(b=>b.addEventListener('click', ()=>{
+      state.dashCal = b.dataset.cal;
+      render();
+    }));
+    const sel = document.getElementById('dash-month-select');
+    if(sel) sel.addEventListener('change', ()=>{
+      if(state.dashCal==='greg') state.dashGregMonth = Number(sel.value);
+      else state.dashHebMonth = Number(sel.value);
+      render();
+    });
+  }
+  if(state.tab==='add'){
+    bindAddForm();
+    document.getElementById('add-save').addEventListener('click', ()=>{
+      const type = document.getElementById('add-type').value;
+      const payload = collectAddPayload(type);
+      const prefix = {person:'draft_p', relationship:'draft_r', child:'draft_c', edit:'draft_e'}[type];
+      state.drafts.push({id:uid(prefix), kind:type, payload, createdAt:Date.now(), submittedAt:null});
+      saveDrafts();
+      showToast('נשמר בטיוטה הפרטית שלך ✓');
+      state.tab='drafts';
+      render();
+    });
+  }
+  if(state.tab==='drafts'){
+    document.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click', ()=>{
+      state.drafts = state.drafts.filter(d=>d.id!==b.dataset.delete);
+      saveDrafts();
+      render();
+    }));
+    document.querySelectorAll('[data-submit]').forEach(b=>b.addEventListener('click', ()=>{
+      const draftId = b.dataset.submit;
+      const batch = buildBatchFor(draftId);
+      if(batch.length===0){ showToast('אין מה לשלוח'); return; }
+      const mainDraft = state.drafts.find(d=>d.id===draftId);
+      const summary = 'עדכון עץ משפחה: ' + describeDraft(mainDraft) + (batch.length>1?` (כולל ${batch.length-1} פריטים תלויים)`:'');
+      const payloadStr = JSON.stringify(batch, null, 2);
+      const url = `https://github.com/${REPO}/issues/new`
+        + `?template=update-request.yml`
+        + `&title=${encodeURIComponent('עדכון עץ משפחה: ' + describeDraft(mainDraft))}`
+        + `&summary=${encodeURIComponent(summary)}`
+        + `&payload=${encodeURIComponent(payloadStr)}`;
+      window.open(url, '_blank');
+      const includedIds = new Set(batch.map(op=>op.payload.tempId));
+      state.drafts.forEach(d=>{ if(includedIds.has(d.id)) d.submittedAt = Date.now(); });
+      saveDrafts();
+      showToast('נפתח טופס GitHub — יש להשלים שם את השליחה');
+      render();
+    }));
+  }
+}
+
+tryLoadHebcal();
+init().catch(e=>{
+  console.error('שגיאה בטעינת האתר:', e);
+  const app = document.getElementById('app');
+  if(app) app.innerHTML = '<div class="empty">⚠️ אירעה שגיאה בטעינת האתר. פרטים בקונסול הדפדפן.</div>';
+});
+</script>
+</body>
+</html>

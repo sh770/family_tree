@@ -1,0 +1,8 @@
+{
+  "name": "family-tree-site",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@hebcal/core": "^6.9.2"
+  }
+}
