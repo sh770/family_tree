@@ -1,0 +1,65 @@
+{
+  "persons": [
+    {
+      "id": "p_grandpa",
+      "firstName": "אברהם",
+      "lastName": "כהן",
+      "gender": "M",
+      "isRoot": true,
+      "alive": false,
+      "birthSource": "greg",
+      "birthGreg": "1935-03-01",
+      "birthHebDay": 26,
+      "birthHebMonth": 12,
+      "birthHebYear": 5695,
+      "birthHebDisplay": "כ״ו באדר א׳ תרצ״ה",
+      "deathSource": "greg",
+      "deathGreg": "2015-06-10",
+      "deathHebDay": 23,
+      "deathHebMonth": 3,
+      "deathHebYear": 5775,
+      "deathHebDisplay": "כ״ג בסיוון תשע״ה"
+    },
+    {
+      "id": "p_grandma",
+      "firstName": "שרה",
+      "lastName": "כהן",
+      "gender": "F",
+      "isRoot": false,
+      "alive": true,
+      "birthSource": "greg",
+      "birthGreg": "1938-08-20",
+      "birthHebDay": 23,
+      "birthHebMonth": 5,
+      "birthHebYear": 5698,
+      "birthHebDisplay": "כ״ג באב תרצ״ח",
+      "deathSource": "",
+      "deathGreg": "",
+      "deathHebDay": null,
+      "deathHebMonth": null,
+      "deathHebYear": null,
+      "deathHebDisplay": ""
+    }
+  ],
+  "relationships": [
+    {
+      "id": "r_grandparents",
+      "a": "p_grandpa",
+      "b": "p_grandma",
+      "status": "married",
+      "marriageSource": "greg",
+      "marriageGreg": "1958-06-15",
+      "marriageHebDay": 27,
+      "marriageHebMonth": 3,
+      "marriageHebYear": 5718,
+      "marriageHebDisplay": "כ״ז בסיוון תשי״ח",
+      "divorceSource": "",
+      "divorceGreg": "",
+      "divorceHebDay": null,
+      "divorceHebMonth": null,
+      "divorceHebYear": null,
+      "divorceHebDisplay": ""
+    }
+  ],
+  "children": []
+}
