@@ -13,12 +13,12 @@
       "birthHebMonth": 12,
       "birthHebYear": 5695,
       "birthHebDisplay": "כ״ו באדר א׳ תרצ״ה",
-      "deathSource": "greg",
-      "deathGreg": "2015-06-10",
-      "deathHebDay": 23,
-      "deathHebMonth": 3,
-      "deathHebYear": 5775,
-      "deathHebDisplay": "כ״ג בסיוון תשע״ה"
+      "deathSource": "heb",
+      "deathGreg": "2026-03-19",
+      "deathHebDay": 1,
+      "deathHebMonth": 1,
+      "deathHebYear": 5786,
+      "deathHebDisplay": "א׳ בניסן תשפ״ו"
     },
     {
       "id": "p_grandma",
